@@ -1,39 +1,98 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+export default function HomeScreen() {
+  const [min, setMin] = useState('');
+  const [max, setMax] = useState('');
+  const [randomNumber, setRandomNumber] = useState<number | string | null>(null);
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+  const generateRandomNumber = () => {
+    const minValue = parseInt(min, 10);
+    const maxValue = parseInt(max, 10);
+    if (!isNaN(minValue) && !isNaN(maxValue) && minValue < maxValue) {
+      const random = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+      setRandomNumber(random);
+    } else {
+      setRandomNumber('Intervalo inválido');
     }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
+  };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <View style={styles.container}>
+     <Image source={require('../assets/logo.png')} style={styles.logo} />
+      <Text style={styles.title}>🎲 Gerador de Números Aleatórios 🎲</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        placeholder="Valor mínimo"
+        value={min}
+        onChangeText={setMin}
+        placeholderTextColor="#888"
+      />
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        placeholder="Valor máximo"
+        value={max}
+        onChangeText={setMax}
+        placeholderTextColor="#888"
+      />
+      <TouchableOpacity style={styles.button} onPress={generateRandomNumber}>
+        <Text style={styles.buttonText}>Gerar Número</Text>
+      </TouchableOpacity>
+      {randomNumber !== null && <Text style={styles.result}>Número: {randomNumber}</Text>}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1e1e1e',
+    padding: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    width: '80%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#FFD700',
+    backgroundColor: '#333',
+    color: '#fff',
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    fontSize: 18,
+  },
+  button: {
+    backgroundColor: '#FFD700',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  result: {
+    marginTop: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFD700',
+  },
+});
